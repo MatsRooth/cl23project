@@ -1,0 +1,218 @@
+## Natural Language Toolkit: final.fcfg
+##
+## 5/19 update
+## FIXED: 
+## Sequences of sentences now allowed
+## Also allows for some definitions to aid in 
+## The unique descripition of strings, including "the" and "equal to"
+## A full alphabet
+##
+## Author: Niara (Building off the grammar by Isaac, Ethan, and Angela Liu)
+##
+## For license information, see LICENSE.TXT
+
+% start S
+############################
+# Grammar Rules
+#############################
+
+##Sentence productions 
+S[SEM=<?subj(?vp)>] -> DP[NUM=?b, SEM=?subj] VP[NUM=?b, SEM=?vp]
+S[SEM=<?vp(?subj)>] -> NP[NUM=?b, SEM=?subj] VP[NUM=?b, SEM=?vp]
+# S[SEM=<exists c(char(?P, c) & char(?Q, c))>] -> NP[SEM=?P] 'equals' NP[SEM=?Q]
+S[SEM=<(-?P & ?Q ) | (?P & -?Q)>] -> S[SEM=?P] 'exclusively' 'or' S[SEM=?Q]
+S[SEM=<?p & ?q>] -> S[SEM=?p] 'and' S[SEM=?q]
+S[SEM=<?p | ?q>] -> S[SEM=?p] 'or' S[SEM=?q]
+S[SEM=<?p & ?q>] -> S[SEM=?p] '.' S[SEM=?q]
+
+##Sentence productions for relative clauses
+S[NUM=?b, SEM = <\y.(?vp(y))>]/NP[NUM=?n] -> NP/NP VP[NUM=?b,SEM=?vp]
+S[SEM = <\y.(?vp(y)(?subj))>]/NP -> NP[NUM=?n,SEM=?subj] VP[NUM=?n,SEM=?vp]/NP
+
+##Existential sentence
+S[SEM=<?subj(?v)>] -> 'there' V[NUM=?b, SEM=?v] DP[STR=no, NUM=?b, SEM=?subj]
+
+##complementizers for relative clauses
+CP[SEM=?P, NUM=?b] -> 'that' S[SEM=?P, NUM=?b]/NP
+
+##Conjunctions
+C[SEM='AND'] -> 'and'
+C[SEM='OR'] -> 'or'
+
+##DP level constructions
+DP[NUM=?b, STR=?s, SEM=<?X(?P)>] -> Det[STR=?s, NUM=?b, SEM=?X] N[NUM=?b, SEM=?P] 
+DP[NUM=?b, SEM=<?X(?n)>] -> Only[SEM=?X] NP[NUM=?b, SEM=?n]
+DP[NUM=?b, STR=yes, SEM=<?X(?P)>] -> Adv[STR=?s, SEM=?X] DP[NUM=?b, STR=yes, SEM=?P]
+
+##coordinated DPs
+DP[NUM=?b, SEM=<\P.(?A(P) & ?B(P))>] -> DP[SEM=?A] C[SEM='AND'] DP[NUM=?b, SEM=?B]
+DP[NUM=?b, SEM=<\P.(?A(P) | ?B(P))>] -> DP[SEM=?A] C[SEM='OR'] DP[NUM=?b, SEM=?B]
+ 
+#VP constructions
+VP[NUM=?b, SEM=?Q] -> V[NUM=?b] A[SEM=?Q]
+VP[NUM=?b, SEM=<\n.(?A(n) | ?B(n))>] -> V[NUM=?b] A[SEM=?A] 'or' A[SEM=?B]
+VP[NUM=?b, SEM=<\n.(?A(n) & ?B(n))>] -> V[NUM=?b] A[SEM=?A] 'and' A[SEM=?B]
+
+#VP constructions for N=N
+VP[NUM=?sg, SEM=<?Q>] -> V[NUM=?sg] Det[NUM=?sg] N[NUM=?sg, SEM=?Q]
+VP[NUM=?pl, SEM=?Q] -> V[NUM=?pl] N[N=?pl, SEM=?Q]
+
+VP[NUM=?b, SEM=<?Q(?n)>] -> V[NUM=?b] A[SEM=?Q] P NP[SEM=?n]
+VP[NUM=?b, SEM=<?Q(?n)>] -> V[NUM=?b] A[SEM=?Q] P DP[SEM=?n]
+VP[NUM=?b, SEM=<\x.(?P(?n)(x) & ?R(?n)(x))>] -> ADV[SEM=?P] TV[NUM=?b, SEM=?R] NP[NUM=?b, SEM=?n]
+
+VP[NUM=?b, SEM=<\n.(?Q(n) & ?P(n))>] -> VP[NUM=?b, SEM=?Q] 'and' VP[NUM=?b, SEM=?P]
+VP[NUM=?b, SEM=<\n.(?Q(n) | ?P(n))>] -> VP[NUM=?b, SEM=?Q] 'or' VP[NUM=?b, SEM=?P]
+
+VP[NUM=?b, SEM=<\n.(?A(n) | ?B(n))>] -> V[NUM=?b] 'a' N[SEM=?A] 'or' A[SEM=?B]
+VP[NUM=?b, SEM=<\n.(?A(n) & ?B(n))>] -> V[NUM=?b] 'a' N[SEM=?A] 'and' A[SEM=?B]
+
+VP[NUM=?b, SEM=<\n.(?A(n) | ?B(n))>] -> V[NUM=?b] 'a' N[SEM=?A] 'or' 'a' N[SEM=?B]
+VP[NUM=?b, SEM=<\n.(?A(n) & ?B(n))>] -> V[NUM=?b] 'a' N[SEM=?A] 'and' 'a' N[SEM=?B]
+
+##VP constructions for relative clauses
+VP[NUM=?n,SEM=<\y x.(?v(y)(x))>]/NP -> TV[NUM=?n,SEM=?v] NP/NP[SEM=?obj]
+VP[NUM=?b, SEM=?Q]/NP -> V[NUM=?b] A[SEM=?Q] P NP/NP
+
+# This is excluded 
+# VP[SEM=<\x.offend(x)>] -> 'offends'
+
+# Transitive verb with individual object.
+VP[NUM=?b, SEM=<?R(?n)>] -> TV[NUM=?b, SEM=?R] NP[SEM=?n]
+
+
+# Transitive verb with quantifier object.
+# The object is given minimal scope.
+VP[NUM=?b, SEM=<\m.?X(\n.(?R(n)(m)))>] -> TV[NUM=?b, SEM=?R] DP[SEM=?X]
+VP[NUM=?b, SEM=<\m.?X(\n.(?R(n)(m)))>] -> ADV[SEM=?P] TV[NUM=?b, SEM=?R] DP[SEM=?X]
+
+#############################
+# Lexical Rules
+#############################
+
+A[SEM=<\n.exists c.(vowel(c) & char(n,c))>] -> 'vocalic'
+
+A[SEM=<\n.exists c.(!(vowel(c)) &char(n,c))>] -> 'consonantal'
+
+A[SEM=<\n.exists c.(capital(n) & char(n,c))>] -> 'capitalized'
+
+A[SEM=<\n.capital(n)>] -> 'capital'
+
+A[SEM=<\n.not exists c d.(le(n,d) & char(n,c))>] -> 'final'
+
+A[SEM=<\n.not exists c d.(le(d,n) & char(n,c))>] -> 'initial'
+
+A[SEM=<\n m.exists c.(ad(n,m) and char(n,c))>] -> 'adjacent'
+
+A[SEM=<\n all c m.((char(m,c) & char(n,c)) -> m = n)>] -> 'unique'
+
+A[SEM=<\n m.exists c.(char(n,c) & (char(m,c)))>] -> 'equal'
+
+A[SEM=<\n.even(n)>] -> 'even'
+A[SEM=<\n.odd(n)>] -> 'odd'
+A[SEM=<\n.exists m c.(char(n,c) & char(m,c) & (le(m,n) | le(n,m)))>] -> 'repeated'
+
+
+A[SEM=<\n.(-voiced(n))>] -> 'unvoiced'
+A[SEM=<\n.(voiced(n))>] -> 'voiced'
+A[SEM=<\n.exists c.(cent(n) & char(n,c))>] -> 'centered'
+A[SEM=<\n.mirrored(n)>] -> 'mirrored'
+A[SEM=<\n.(exists c.char(n, c) & exists d.(adj(n, d) & le(n, d) & -(exists m.(le(d, m)))))>] -> 'penultimate'
+A[SEM=<\n.not exists c d.(le(n,d) & char(n,c))>] -> 'last'
+ADV[SEM=<\n m.exists c.(ad(n,m) and char(n,c))>] -> 'immediately'
+
+A[SEM=<?f(?P)>] -> Adv[SEM=?f] A[SEM=?P]
+
+Adv[STR=?s, SEM=<\P x.-P(x)>] -> 'not'
+ADV[SEM=<\m n.exists c.(ad(m,n) and char(m,c))>] -> 'immediately'
+
+
+#Only[SEM=<\n Q.exists h.all m.(char(n,h) & (m!=n -> (Q(n) & -Q(m))))>] -> 'only'
+
+
+P[+to] -> 'to'
+
+NP/NP ->
+
+
+Det[STR=yes, NUM=sg, SEM=<\P Q.all n.(P(n) -> Q(n))>] -> 'every'
+Det[STR= no, NUM=sg, SEM=<\P Q.exists n.(P(n) & Q(n))>] -> 'a'
+Det[STR= no, NUM=sg, SEM=<\P Q.exists n.(P(n) & Q(n))>] -> 'an'
+Det[STR=yes, NUM=pl, SEM=<\P Q.all n.(P(n) -> Q(n))>] -> 'all'
+Det[STR=no, SEM=<\P Q.exists n.(P(n) & Q(n))>] -> 'some'
+Det[STR=no, SEM=<\P Q.all n.(-P(n) -> -Q(n))>] -> 'only'
+Det[STR=no, NUM=sg, SEM=<\P Q.exists n.(P(n)&Q(n))>] -> 'at' 'least' 'one'
+Det[STR=no, SEM=<\P Q.all n.(P(n) -> not Q(n))>] -> 'no'
+Det[STR=no, NUM=sg, SEM=<\P Q.exists m n.(P(n) & Q(n) & P(m) & Q(m) & m!=n)>] -> 'more' 'than' 'one'
+Det[STR=yes, NUM=sg, SEM=<\P Q.exists h.all n.(P(n) -> Q(n) & (h!=n -> !Q(n)))>] -> 'the'
+
+N[NUM=?b,SEM=<\x.(?P(x) & ?Q(x))>] -> N[NUM=?b,SEM=?P] CP[NUM=?b, SEM=?Q]
+N[NUM=?b, SEM=<\x.(?P(x) & ?Q(x))>] -> A[SEM=?P] N[NUM=?b, SEM=?Q]
+NP[NUM=?b, SEM=<\n.(?A(n) & ?N(n))>] -> A[SEM=?A] N[NUM=?b, SEM=?N]
+
+N[SEM=<\n.char(n,leta)>] -> 'a'
+N[SEM=<\n.char(n,letb)>] -> 'b'
+N[SEM=<\n.char(n,letc)>] -> 'c'
+N[SEM=<\n.char(n,letd)>] -> 'd'
+N[SEM=<\n.char(n,lete)>] -> 'e'
+N[SEM=<\n.char(n,letf)>] -> 'f'
+N[SEM=<\n.char(n,letg)>] -> 'g'
+N[SEM=<\n.char(n,leth)>] -> 'h'
+N[SEM=<\n.char(n,leti)>] -> 'i'
+N[SEM=<\n.char(n,letj)>] -> 'j'
+N[SEM=<\n.char(n,letk)>] -> 'k'
+N[SEM=<\n.char(n,letl)>] -> 'l'
+N[SEM=<\n.char(n,letm)>] -> 'm'
+N[SEM=<\n.char(n,letn)>] -> 'n'
+N[SEM=<\n.char(n,leto)>] -> 'o'
+N[SEM=<\n.char(n,letp)>] -> 'p'
+N[SEM=<\n.char(n,letq)>] -> 'q'
+N[SEM=<\n.char(n,letr)>] -> 'r'
+N[SEM=<\n.char(n,lets)>] -> 's'
+N[SEM=<\n.char(n,lett)>] -> 't'
+N[SEM=<\n.char(n,letu)>] -> 'u'
+N[SEM=<\n.char(n,letv)>] -> 'v'
+N[SEM=<\n.char(n,letw)>] -> 'w'
+N[SEM=<\n.char(n,letx)>] -> 'x'
+N[SEM=<\n.char(n,lety)>] -> 'y'
+N[SEM=<\n.char(n,letz)>] -> 'z'
+
+
+
+
+N[NUM=sg, SEM=<\n.exists c.char(n,c)>] -> 'letter'
+N[NUM=pl, SEM=<\n.exists c.char(n,c)>] -> 'letters'
+N[NUM=sg, SEM=<\n.exists c.(vowel(c) & char(n,c))>] -> 'vowel'
+N[NUM=pl, SEM=<\n.exists c.(vowel(c) & char(n,c))>] -> 'vowels'
+N[NUM=sg, SEM=<\n.exists c.(!vowel(c) & char(n,c))>] -> 'consonant'
+N[NUM=pl, SEM=<\n.exists c.(!vowel(c) & char(n,c))>] -> 'consonants'
+N[NUM=sg, SEM=<\n.exists c.(glide(c) & char(n,c))>] -> 'glide'
+N[NUM=pl, SEM=<\n.exists c.(glide(c) & char(n,c))>] -> 'glides'
+N[NUM=sg, SEM=<\n.exists c.(char(n,c) & fricative(c))>] -> 'fricative'
+N[NUM=pl, SEM=<\n.exists c.(char(n,c) & fricative(c))>] -> 'fricatives'
+
+NP[NUM=sg, SEM=<1>] -> 'letter' 'one'
+NP[NUM=sg, SEM=<2>] -> 'letter' 'two'
+NP[NUM=sg, SEM=<3>] -> 'letter' 'three'
+NP[NUM=sg, SEM=<4>] -> 'letter' 'four'
+NP[NUM=sg, SEM=<5>] -> 'letter' 'five'
+NP[NUM=sg, SEM=<6>] -> 'letter' 'six'
+NP[NUM=sg, SEM=<7>] -> 'letter' 'seven'
+NP[NUM=sg, SEM=<8>] -> 'letter' 'eight'
+NP[NUM=sg, SEM=<9>] -> 'letter' 'nine'
+NP[NUM=sg, SEM=<10>] -> 'letter' 'ten'
+
+V[NUM=?b, SEM=<(not ?v)>] -> V[NUM=?b, SEM=?v] 'not'
+
+V[NUM=sg, SEM=<\n.exists c.char(n,c)>] -> 'is'
+V[NUM=pl, SEM=<\n.exists c.char(n,c)>] -> 'are'
+
+
+
+TV[NUM=sg, SEM=<\m n.le(m,n)>] -> 'follows'
+TV[NUM=pl, SEM=<\m n.le(m,n)>] -> 'follow'
+
+TV[NUM=sg, SEM=<\m n.le(n,m)>] -> 'precedes'
+TV[NUM=pl, SEM=<\m n.le(n,m)>] -> 'precede'
+
+
