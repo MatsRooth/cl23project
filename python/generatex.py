@@ -1,5 +1,4 @@
-# Generate sentences from a grammar
-# Based on code from Adam
+# Generate sentences from a grammar with variable terminals
 
 from nltk import grammar, parse, load_parser
 import sys
